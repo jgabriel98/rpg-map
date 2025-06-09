@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, useSearchParams } from '@solidjs/router'
 import { createRenderEffect, createSignal } from 'solid-js'
-import { useSession } from '~/contexts/Session'
+import { useSession } from '~/contexts/Session.context'
 import { supabase } from '~/lib/supabase'
 
 

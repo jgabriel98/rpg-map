@@ -2,11 +2,11 @@ import { createEffect, createSignal, createUniqueId, type Component } from 'soli
 
 import { fileUploader, UploadFile } from '@solid-primitives/upload';
 import { buckets, supabase } from '~/lib/supabase';
-import { useSession } from '~/contexts/Session';
+import { useSession } from '~/contexts/Session.context';
 import { Tables } from '~/lib/supabase/database.types';
 import { useNavigate } from '@solidjs/router';
 import { Show } from 'solid-js';
-import { HexMap } from '../components/HexMap';
+import { HexMap } from '../components/HexMap.component';
 import { HexGridProvider } from '../directives';
 
 fileUploader; // Preserve the import.
@@ -66,21 +66,30 @@ const CreateMap: Component = () => {
 
   return (
     <HexGridProvider>
-      <div style={{ position: 'absolute' }}>
+      <div style={{ position: 'absolute', display: 'flex', "flex-direction": "column" }}>
+        <div>
+        <label for="files" class="btn">Envie a imagem de fundo do mapa: </label>
         <input
           type="file"
           accept='image/*'
           multiple={false}
           use:fileUploader={{
-            userCallback: _ => {},
+            userCallback: _ => { },
             setFiles,
           }}
         />
+        </div>
 
+        <div>
+          <span>Tamanho do bloco: </span>
+          <span>{tileRadius()} </span>
+
+          <button on:click={() => setTileRadius(tileRadius() + 1)}>+</button>
+          <button on:click={() => setTileRadius(tileRadius() - 1)}>-</button>
+
+        </div>
         <button on:click={submit}>salvar</button>
-        <button on:click={() => setTileRadius(tileRadius() + 1)}>grid +</button>
-        <span>{tileRadius()}</span>
-        <button on:click={() => setTileRadius(tileRadius() - 1)}>grid -</button>
+
       </div>
       <Show when={backgroundImageFile()?.source}>
         <HexMap backgroundSrc={backgroundImageFile()!.source} tileRadius={tileRadius()} />

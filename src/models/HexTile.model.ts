@@ -35,12 +35,6 @@ class HexTile extends Hex {
     else this._svgGroup.removeClass('selectedHex');
   }
 
-  // toggleSelect() {
-    // if (!this._svgGroup) throw new Error("SVG element not rendered yet. Call renderSVG first.");
-    // this._selected = !this._selected;
-    // this._svgGroup.toggleClass('selectedHex');
-  // }
-
   public renderSVG(svgCanvas: Svg, options: RenderSVGOptions = {}) {
     this._svgGroup?.remove();
 

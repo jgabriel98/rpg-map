@@ -37,8 +37,6 @@ const Maps: Component = () => {
   // const [maps, setMaps] = createSignal<Tables<'maps'>[]>();
   const maps = createAsync(() => getMaps());
 
-
-
   return <>
     <For each={maps()?.data} fallback={<Fallback isLoading={maps()?.count == 0} />}>
       {(map) => <MapPreview map={map} />}

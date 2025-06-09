@@ -2,9 +2,9 @@ import { createAsync, query, useParams } from '@solidjs/router';
 import { Match, Show, Switch } from 'solid-js';
 import { Suspense, type Component } from 'solid-js';
 import { buckets, supabase } from '~/lib/supabase';
-import { HexMap } from '~/UI/components/HexMap';
+import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
-import Loading from '../components/Loading';
+import Loading from '../components/Loading.component';
 
 type MapRouteParams = {
   id: string
@@ -14,15 +14,16 @@ const Map: Component = () => {
   const { id } = useParams<MapRouteParams>();
   const mapsQuery = createAsync(() => getMapConfigs(id));
 
-  const backgroundUrl = () => mapsQuery()?.data?.background_url ?? null
+  const backgroundUrl = () => mapsQuery()?.data?.background_url;
+  const tileRadius = () => mapsQuery()?.data?.hex_tile_radius;
 
 
   return (
     <HexGridProvider>
       <Suspense fallback={<Loading />}>
         <Switch>
-          <Match when={backgroundUrl() !== null}>
-            <HexMap backgroundSrc={backgroundUrl()!} tileRadius={25} />
+          <Match when={mapsQuery()?.data}>
+            <HexMap backgroundSrc={backgroundUrl()!} tileRadius={tileRadius()!} />
           </Match>
 
           <Match when={backgroundUrl() == null}>

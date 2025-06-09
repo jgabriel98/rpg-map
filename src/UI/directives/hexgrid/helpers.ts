@@ -1,7 +1,7 @@
 import { Color, Morphable, Text } from "@svgdotjs/svg.js";
 import { aStar } from "abstract-astar";
 import { Grid, ring } from "honeycomb-grid";
-import { HexTile } from "~/models/HexTile";
+import { HexTile } from "~/models/HexTile.model";
 
 export function createShortestPath_AStar<T extends HexTile>(grid: Grid<T>, start: T, goal: T) {
   return aStar<T>({

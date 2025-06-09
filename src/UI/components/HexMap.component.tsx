@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, Show } from "solid-js";
 
 import { hexGrid, panZoom, useHexGrid } from "../directives";
 import styles from './HexMap.module.css';
-import { HexTile } from "~/models/HexTile";
+import { HexTile } from "~/models/HexTile.model";
 
 panZoom; hexGrid;// Preserve the import.
 

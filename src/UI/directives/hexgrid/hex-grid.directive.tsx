@@ -1,9 +1,9 @@
 import { rectangle } from "honeycomb-grid";
 import { Accessor, createMemo, createRenderEffect, onCleanup, onMount, useContext } from "solid-js";
 import { listenToMouseClick, MouseEventWithDrag } from "~/lib/mouse";
-import HexGrid from "~/models/HexGrid";
-import { defineHexTile, HexTile } from "~/models/HexTile";
-import { HexGridContext } from "./context";
+import HexGrid from "~/models/HexGrid.model";
+import { defineHexTile, HexTile } from "~/models/HexTile.model";
+import { HexGridContext } from "~/contexts/HexGrid.context";
 
 declare module "solid-js" {
   namespace JSX {

@@ -11,8 +11,6 @@ declare module "solid-js" {
 }
 
 type PanZoomOptions = {
-  /** defaults to `5` */
-  // stepDeg?: number;
   enable: boolean;
 } | undefined;
 
@@ -101,13 +99,6 @@ export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOpt
 
     _panZoomInstance.on('panend', (e: PanZoom) => {
       adjustTransformToBounds(e)
-    })
-
-    _panZoomInstance.on('zoomend', (e: PanZoom) => {
-      const elementRect = elRef.getBoundingClientRect();
-
-      // console.log("terminou zoom")
-
     })
   })
 

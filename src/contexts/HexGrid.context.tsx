@@ -1,6 +1,6 @@
-import { Accessor, createContext, createEffect, createRenderEffect, createSignal, JSX, Setter, useContext } from "solid-js";
-import HexGrid from "~/models/HexGrid";
-import { HexTile } from "~/models/HexTile";
+import { Accessor, createContext, createEffect, createRenderEffect, createSignal, JSX, on, Setter, useContext } from "solid-js";
+import HexGrid from "~/models/HexGrid.model";
+import { HexTile } from "~/models/HexTile.model";
 
 interface HexGridContext<T extends HexTile> {
   grid: Accessor<HexGrid<T> | undefined>
@@ -16,6 +16,8 @@ interface HexGridProviderProps {
   children: JSX.Element
 }
 
+const noop: (...args: any[]) => any = () => { };
+ 
 export function HexGridProvider(props: HexGridProviderProps) {
   const [grid, setGrid] = createSignal<HexGrid<HexTile>>();
   const [selectedTiles, setSelectedTiles] = createSignal<HexTile[]>([]);
@@ -31,10 +33,9 @@ export function HexGridProvider(props: HexGridProviderProps) {
     setSelectedTiles(newSelecteds);
   }
 
-  createRenderEffect(() => {
-    grid();
-    setSelectedTiles([]);
-  })
+  createRenderEffect(
+    on(grid, () => setSelectedTiles([]))
+  )
 
 
   createEffect((previousPath?: HexTile[]) => {
@@ -51,8 +52,8 @@ export function HexGridProvider(props: HexGridProviderProps) {
     return undefined;
   });
 
-  const createPath = grid()!.createPath;
-  const clearPath = grid()!.clearPath;
+  const createPath = grid()?.createPath ?? noop;
+  const clearPath = grid()?.clearPath ?? noop;
 
   return (
     <HexGridContext.Provider value={{ grid, setGrid, selectTile, createPath, clearPath }}>

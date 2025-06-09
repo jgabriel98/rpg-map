@@ -3,15 +3,15 @@ import { Route, Router, useNavigate } from "@solidjs/router";
 import { lazy, ParentComponent, ParentProps, Suspense } from 'solid-js';
 import { render } from 'solid-js/web';
 
-import { SessionProvider } from './contexts/Session';
+import { SessionProvider } from './contexts/Session.context';
 import { supabase } from "./lib/supabase";
-import Auth from './UI/pages/Auth';
-import CreateMap from './UI/pages/CreateMap';
-import Map from './UI/pages/Map';
-import Maps from './UI/pages/Maps';
+import Auth from './UI/pages/Auth.page';
+import CreateMap from './UI/pages/CreateMap.page';
+import Map from './UI/pages/Map.page';
+import Maps from './UI/pages/Maps.page';
 
 import './index.css';
-import Loading from "./UI/components/Loading";
+import Loading from "./UI/components/Loading.component";
 
 const root = document.getElementById('root');
 
