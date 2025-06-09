@@ -1,8 +1,17 @@
 /* @refresh reload */
+import { Route, Router, useNavigate } from "@solidjs/router";
+import { lazy, ParentComponent, ParentProps, Suspense } from 'solid-js';
 import { render } from 'solid-js/web';
 
+import { SessionProvider } from './contexts/Session';
+import { supabase } from "./lib/supabase";
+import Auth from './UI/pages/Auth';
+import CreateMap from './UI/pages/CreateMap';
+import Map from './UI/pages/Map';
+import Maps from './UI/pages/Maps';
+
 import './index.css';
-import App from './App';
+import Loading from "./UI/components/Loading";
 
 const root = document.getElementById('root');
 
@@ -12,4 +21,39 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <App />, root!);
+const AuthGuard: ParentComponent = ({ children }) => {
+
+  const AsyncSessionChecker = lazy(async () => {
+    const navigate = useNavigate();
+    const { data } = await supabase.auth.getSession();
+
+    console.log('getting  session', data.session)
+    if (data.session === null) navigate('/auth', { replace: true });
+
+    return {
+      default: ({ children }: ParentProps) => children
+    };
+  })
+
+  return <Suspense fallback={<Loading />}>
+    <AsyncSessionChecker children={children} />
+  </Suspense>
+}
+
+
+// SUGESTÃO PARA ROTAS AUTENTICADAS: https://github.com/solidjs/solid-router/discussions/364#discussioncomment-11537405
+render(() => (
+  <SessionProvider>
+    <Router>
+      <Route path={['/auth', '/auth/confirm']} component={Auth} />
+
+        <Route path='/' component={AuthGuard}>
+          <Route path='/' component={Maps} />
+          <Route path='/maps' component={Maps} />
+          <Route path='/maps/:id' component={Map} />
+          <Route path='/maps/create' component={CreateMap} />
+        </Route>
+
+    </Router>
+  </SessionProvider>
+), root!);

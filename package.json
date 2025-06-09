@@ -4,6 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
+    "sync-supabase": "supabase gen types typescript --project-id euhstpdyheurovbigpye --schema public > ./src/lib/supabase/database.types.ts",
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
@@ -11,16 +12,20 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.15.29",
     "typescript": "^5.7.2",
     "vite": "^6.0.0",
     "vite-plugin-solid": "^2.11.6"
   },
   "dependencies": {
     "@solid-primitives/set": "^0.7.1",
+    "@solid-primitives/upload": "^0.1.1",
     "@solidjs/router": "^0.15.3",
+    "@supabase/supabase-js": "^2.49.10",
     "@svgdotjs/svg.draw.js": "^3.0.2",
     "@svgdotjs/svg.js": "^3.2.4",
     "@tailwindcss/vite": "^4.1.8",
+    "@tanstack/solid-query": "^5.80.6",
     "abstract-astar": "^0.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
