@@ -1,33 +1,29 @@
-import { rectangle } from "honeycomb-grid";
-import { Accessor, createMemo, createRenderEffect, onCleanup, onMount, useContext } from "solid-js";
+import { Component, createEffect, createMemo, createRenderEffect, createSignal, onCleanup, onMount, Show, useContext } from "solid-js";
+// import { ReactiveSet, ReactiveWeakSet } from "@solid-primitives/set";
+
+import { panZoom, useHexGrid } from "../directives";
+import styles from './HexMap.module.css';
 import { listenToMouseClick, MouseEventWithDrag } from "~/lib/mouse";
-import HexGrid from "~/models/HexGrid.model";
-import { defineHexTile, HexTile } from "~/models/HexTile.model";
+import { defineHexTile } from "~/models/HexTile.model";
 import { HexGridContext } from "~/contexts/HexGrid.context";
+import { rectangle } from "honeycomb-grid";
+import HexGridModel from "~/models/HexGrid.model";
 
-declare module "solid-js" {
-  namespace JSX {
-    interface Directives {
-      hexGrid: HexGridOptions
-    }
-  }
-}
 
-type HexGridOptions = {
-  enable: boolean;
+panZoom;// Preserve the import.
+
+
+interface HexGridProps {
   tileRadius: number;
-  /** defaults to 1 */
-  costPerTile?: number;
-  onClick?: (hex: HexTile) => void
-};
-
+  costPerTile: number;
+}
 
 const HEX_HORIZONTAL_RATIO = 4 / 3; // ratio of hexagon width to quantity of hexagons, when on a grid
 
-/** @deprecated use HexGrid component instead */
-export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOptions>) {
+export const HexGrid: Component<HexGridProps> = (props) => {
+  let elRef!: HTMLDivElement;
   const context = useContext(HexGridContext)
-  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: options().tileRadius, cost: options().costPerTile }))
+  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: props.tileRadius, cost: props.costPerTile }))
 
   function onHexClick({ offsetX, offsetY, isDrag }: MouseEventWithDrag) {
     const hex = context!.grid()!.pointToHex({ x: offsetX, y: offsetY }, { allowOutside: false })
@@ -36,12 +32,10 @@ export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOpt
     if (!isDrag) {
       const shouldUnselect = hex.selected;
       context?.selectTile(hex, shouldUnselect)
-      options().onClick?.(hex);
     }
   }
 
-  createRenderEffect(() => {
-    if (!options().enable) return;
+  createEffect(() => { 
     if (!context) throw new Error("use:hexGrid must be used inside a HexGridProvider");
     const CustomHexTile = CustomHexTileClass()
 
@@ -59,7 +53,7 @@ export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOpt
 
     const cols = Math.round((parentBox.width) / howManyPixelsPerTile.x);
     const rows = Math.round(parentBox.height / howManyPixelsPerTile.y);
-    const grid = new HexGrid(CustomHexTile, rectangle({ width: cols, height: rows }));
+    const grid = new HexGridModel(CustomHexTile, rectangle({ width: cols, height: rows }));
 
     context.setGrid(prev => {
       prev?.clearRender?.();
@@ -72,4 +66,6 @@ export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOpt
   let removeMouseClickListener: ReturnType<typeof listenToMouseClick>;
   onMount(() => { removeMouseClickListener = listenToMouseClick(elRef, onHexClick) })
   onCleanup(() => { removeMouseClickListener() })
+
+  return <div ref={elRef} class={styles.hexGrid}  />
 }

@@ -32,6 +32,7 @@ const CreateMap: Component = () => {
   const [files, setFiles] = createSignal<UploadFile[]>([]);
   const backgroundImageFile = () => files().at(0)
   const [tileRadius, setTileRadius] = createSignal(25);
+  const [tileCost, setTileCost] = createSignal(1);
 
   const session = useSession();
   const navigate = useNavigate();
@@ -42,7 +43,9 @@ const CreateMap: Component = () => {
     if (!backgroundFile) return;
 
     const { data, error } = await supabase.from('maps').insert({
-      hex_tile_radius: tileRadius()
+      hex_tile_radius: tileRadius(),
+      tile_cost: tileCost(),
+      background_url: ""
     }).select('id').single();
     if (error) throw error;
 
@@ -85,14 +88,22 @@ const CreateMap: Component = () => {
           <span>{tileRadius()} </span>
 
           <button on:click={() => setTileRadius(tileRadius() + 1)}>+</button>
-          <button on:click={() => setTileRadius(tileRadius() - 1)}>-</button>
+          <button on:click={() => setTileRadius(Math.max(tileRadius() - 1, 0))}>-</button>
+        </div>
+
+        <div>
+          <span>Custo de movimento por bloco: </span>
+          <span>{tileCost()} </span>
+
+          <button on:click={() => setTileCost(tileCost() + 1)}>+</button>
+          <button on:click={() => setTileCost(Math.max(tileCost() - 1, 0))}>-</button>
 
         </div>
         <button on:click={submit}>salvar</button>
 
       </div>
       <Show when={backgroundImageFile()?.source}>
-        <HexMap backgroundSrc={backgroundImageFile()!.source} tileRadius={tileRadius()} />
+        <HexMap backgroundSrc={backgroundImageFile()!.source} tileRadius={tileRadius()} tileCost={tileCost()}/>
       </Show>
     </HexGridProvider>
   );

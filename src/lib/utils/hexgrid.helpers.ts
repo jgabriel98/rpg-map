@@ -4,6 +4,7 @@ import { Grid, ring } from "honeycomb-grid";
 import { HexTile } from "~/models/HexTile.model";
 
 export function createShortestPath_AStar<T extends HexTile>(grid: Grid<T>, start: T, goal: T) {
+  console.log("tile.cost =", start.cost)
   return aStar<T>({
     start,
     goal,
@@ -36,7 +37,7 @@ export function paintTraversablePath<T extends HexTile>(grid: Grid<T>, path: T[]
       index++;
       totalCost += tile.cost;
     })
-    totalCost--;
+    totalCost-=startTile.cost;
 
   // path.filter((tile) => !tile.equals([start.q, start.r]))
   //   .forEach((tile) => {

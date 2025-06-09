@@ -11,11 +11,14 @@ const MapPreview: Component<{ map: Tables<'maps'> }> = ({ map }) => {
     <div on:click={() => navigate(`/maps/${map.id}`)}>
       <h2>Map ID: {map.id}</h2>
       <p>Created at: {new Date(map.created_at).toLocaleString()}</p>
-      <img src={map.background_url!} alt={`Map ${map.id}`}  />
+      <img src={map.background_url!} alt={`Map ${map.id}`} />
+      <div>
+        <button>Remover</button>
+        <button>Editar</button>
+      </div>
     </div>
   );
 }
-
 
 const getMaps = query(async () => {
   let { data, count, error } = await supabase.from("maps").select()
@@ -23,7 +26,7 @@ const getMaps = query(async () => {
   data?.forEach(map => {
     map.background_url = buckets.mapsAssets.getPublicUrl(map.background_url!, {
       transform: {
-        height:300, width: 300,
+        height: 300, width: 300,
         resize: 'contain'
       }
     }).data.publicUrl;
@@ -38,12 +41,13 @@ const Maps: Component = () => {
   const maps = createAsync(() => getMaps());
 
   return <>
-    <For each={maps()?.data} fallback={<Fallback isLoading={maps()?.count == 0} />}>
-      {(map) => <MapPreview map={map} />}
-    </For>
+    <div style={{ display: 'flex', "flex-direction": "row" }}>
+      <For each={maps()?.data} fallback={<Fallback isLoading={maps()?.count == 0} />}>
+        {(map) => <MapPreview map={map} />}
+      </For>
+    </div>
     <A href='/maps/create'>Criar novo mapa</A>
-  </>
-    ;
+  </>;
 };
 
 export default Maps;

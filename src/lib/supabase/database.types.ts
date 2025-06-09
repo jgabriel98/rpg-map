@@ -11,25 +11,28 @@ export type Database = {
     Tables: {
       maps: {
         Row: {
-          background_url: string | null
+          background_url: string
           created_at: string
           hex_tile_radius: number
           id: number
           owner_id: string | null
+          tile_cost: number
         }
         Insert: {
-          background_url?: string | null
+          background_url: string
           created_at?: string
           hex_tile_radius: number
           id?: number
           owner_id?: string | null
+          tile_cost?: number
         }
         Update: {
-          background_url?: string | null
+          background_url?: string
           created_at?: string
           hex_tile_radius?: number
           id?: number
           owner_id?: string | null
+          tile_cost?: number
         }
         Relationships: []
       }

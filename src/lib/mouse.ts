@@ -18,8 +18,6 @@ function createOnMouseUp(listener: (ev: MouseEventWithDrag) => any) {
 }
 
 
-
-
 export function listenToMouseClick<T extends HTMLElement>(el: T, listener: (ev: MouseEventWithDrag) => any) {
   el.addEventListener('pointerdown', onMouseDown);
   el.addEventListener('pointermove', onMouseMove);

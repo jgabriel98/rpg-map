@@ -1,7 +1,7 @@
 import { Grid } from "honeycomb-grid";
 import { Svg, SVG } from "@svgdotjs/svg.js";
 import { HexTile } from "./HexTile.model";
-import { createShortestPath_AStar, paintTraversablePath, unpaintTraversablePath } from "~/UI/directives/hexgrid/helpers";
+import { createShortestPath_AStar, paintTraversablePath, unpaintTraversablePath } from "~/lib/utils/hexgrid.helpers";
 
 
 class HexGrid<T extends HexTile = HexTile> extends Grid<T> {

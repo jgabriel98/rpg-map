@@ -14,19 +14,21 @@ const Map: Component = () => {
   const { id } = useParams<MapRouteParams>();
   const mapsQuery = createAsync(() => getMapConfigs(id));
 
-  const backgroundUrl = () => mapsQuery()?.data?.background_url;
-  const tileRadius = () => mapsQuery()?.data?.hex_tile_radius;
-
+  const mapConfig = () => mapsQuery()?.data;
 
   return (
     <HexGridProvider>
       <Suspense fallback={<Loading />}>
         <Switch>
-          <Match when={mapsQuery()?.data}>
-            <HexMap backgroundSrc={backgroundUrl()!} tileRadius={tileRadius()!} />
+          <Match when={mapConfig()}>
+            <HexMap backgroundSrc={mapConfig()!.background_url} tileRadius={mapConfig()!.hex_tile_radius} tileCost={mapConfig()!.tile_cost} />
           </Match>
 
-          <Match when={backgroundUrl() == null}>
+          <Match when={!mapConfig()}>
+            Mapa não encontrado!
+          </Match>
+
+          <Match when={mapsQuery()?.error}>
             Mapa não encontrado!
           </Match>
         </Switch>

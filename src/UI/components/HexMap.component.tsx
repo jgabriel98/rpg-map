@@ -1,11 +1,11 @@
 import { Component, createEffect, createSignal, Show } from "solid-js";
 // import { ReactiveSet, ReactiveWeakSet } from "@solid-primitives/set";
 
-import { hexGrid, panZoom, useHexGrid } from "../directives";
+import { panZoom } from "../directives";
+import { HexGrid } from "./HexGrid.component";
 import styles from './HexMap.module.css';
-import { HexTile } from "~/models/HexTile.model";
 
-panZoom; hexGrid;// Preserve the import.
+panZoom;// Preserve the import.
 
 
 class MapArea {
@@ -30,6 +30,7 @@ const Gui: Component<GuiProps> = ({ clearPath }) => {
 interface MapContentProps {
   backgroundSrc: string;
   tileRadius: number;
+  tileCost: number;
 }
 
 export const HexMap: Component<MapContentProps> = (props) => {
@@ -49,7 +50,9 @@ export const HexMap: Component<MapContentProps> = (props) => {
     {/* <Gui clearPath={() => clearPath(previousPath)} /> */}
     <div class={styles.container} use:panZoom={{ enable: backgroundReady() }}>
       <img ref={backgroundImage!} class={styles.background} on:load={onBackgroundLoad} src={props.backgroundSrc} alt="Map Background" />
-      <div class={styles.hexGrid} use:hexGrid={{ enable: backgroundReady(), tileRadius: props.tileRadius, costPerTile: 1 }} />
+      <Show when={backgroundReady()}>
+        <HexGrid tileRadius={props.tileRadius} costPerTile={props.tileCost}/>
+      </Show>
     </div>
   </>
 }
