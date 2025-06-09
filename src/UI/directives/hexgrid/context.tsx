@@ -1,11 +1,11 @@
-import { Grid, Hex } from "honeycomb-grid";
-import { Accessor, createContext, createSignal, JSX, Setter, useContext } from "solid-js";
-import HexTile from "../../../models/HexTile";
-import { createShortestPath_AStar, paintTraversablePath, unpaintTraversablePath } from "./helpers";
+import { Accessor, createContext, createEffect, createRenderEffect, createSignal, JSX, Setter, useContext } from "solid-js";
+import HexGrid from "~/models/HexGrid";
+import { HexTile } from "~/models/HexTile";
 
-interface HexGridContext<T extends Hex> {
-  grid: Accessor<Grid<T> | undefined>
-  setGrid: Setter<Grid<T> | undefined>
+interface HexGridContext<T extends HexTile> {
+  grid: Accessor<HexGrid<T> | undefined>
+  setGrid: Setter<HexGrid<T> | undefined>
+  selectTile: (tile: T, unselect?: boolean) => void
   createPath: (start: HexTile, goal: HexTile) => Array<HexTile>
   clearPath: (path: Iterable<HexTile>) => void
 }
@@ -17,31 +17,54 @@ interface HexGridProviderProps {
 }
 
 export function HexGridProvider(props: HexGridProviderProps) {
-  const [grid, setGrid] = createSignal<Grid<HexTile>>();
+  const [grid, setGrid] = createSignal<HexGrid<HexTile>>();
+  const [selectedTiles, setSelectedTiles] = createSignal<HexTile[]>([]);
 
-  const createPath = (start: HexTile, goal: HexTile) => {
+  const selectTile = <T extends HexTile>(tile: T, unselect = false) => {
+    if (!grid()?.hasHex(tile)) throw new Error("tile does not belong to this grid");
+
+    tile.selected = !unselect;
+    const newSelecteds = [...selectedTiles()]
+
+    if (tile.selected) newSelecteds.push(tile);
+    else newSelecteds.splice(newSelecteds.findIndex(v => v === tile), 1);
+    setSelectedTiles(newSelecteds);
+  }
+
+  createRenderEffect(() => {
+    grid();
+    setSelectedTiles([]);
+  })
+
+
+  createEffect((previousPath?: HexTile[]) => {
     const _grid = grid();
-    if (!_grid) throw new Error("Cannot create path without initializing Grid")
+    if (!_grid) return undefined;
+    const tilesList = selectedTiles();
 
-    const shortestPath = createShortestPath_AStar(_grid, start, goal);
+    if (previousPath) _grid.clearPath(previousPath);
 
-    if(!shortestPath) throw new Error("there's no possible path")
-    return paintTraversablePath(_grid, shortestPath)
-  }
+    if (tilesList.length == 2) {
+      return _grid.createPath(tilesList[0], tilesList[1]);
+    }
 
-  const clearPath = (path: Iterable<HexTile>) => {
-    unpaintTraversablePath(path);
-  }
+    return undefined;
+  });
+
+  const createPath = grid()!.createPath;
+  const clearPath = grid()!.clearPath;
 
   return (
-    <HexGridContext.Provider value={{ grid, setGrid, createPath, clearPath }}>
+    <HexGridContext.Provider value={{ grid, setGrid, selectTile, createPath, clearPath }}>
       {props.children}
     </HexGridContext.Provider>
   );
 }
 
 export function useHexGrid() {
-  const { grid, createPath, clearPath} = useContext(HexGridContext)!;
+  const context = useContext(HexGridContext);
+  if (!context) throw new Error("useHexGrid() called outside of <HexGridProvider />")
 
-  return { grid, createPath, clearPath};
+  const { grid, selectTile } = context;
+  return { grid, selectTile };
 }

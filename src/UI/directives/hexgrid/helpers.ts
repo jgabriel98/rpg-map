@@ -1,11 +1,10 @@
-import { Color, Morphable, Polygon, Text } from "@svgdotjs/svg.js";
+import { Color, Morphable, Text } from "@svgdotjs/svg.js";
 import { aStar } from "abstract-astar";
 import { Grid, ring } from "honeycomb-grid";
-import HexTile from "~/models/HexTile";
+import { HexTile } from "~/models/HexTile";
 
-
-export function createShortestPath_AStar(grid: Grid<HexTile>, start: HexTile, goal: HexTile) {
-  return aStar<HexTile>({
+export function createShortestPath_AStar<T extends HexTile>(grid: Grid<T>, start: T, goal: T) {
+  return aStar<T>({
     start,
     goal,
     estimateFromNodeToGoal: (tile) => grid.distance(tile, goal),
@@ -14,30 +13,30 @@ export function createShortestPath_AStar(grid: Grid<HexTile>, start: HexTile, go
   })
 }
 
-export function paintTraversablePath(grid: Grid<HexTile>, path: HexTile[]) {
+export function paintTraversablePath<T extends HexTile>(grid: Grid<T>, path: T[]) {
   const startTile = path[0];
   const goalTile = path[path.length - 1];
   let index = 0;
   let totalCost = 0;
 
   const pathColorRange = new Color('#490657').to('#490657');
-  function getTileFill(tile: HexTile, morphableColor: Morphable) {
+  function getTileFill(tile: T, morphableColor: Morphable) {
     const MAX_COST = 8;
     return morphableColor.at(tile.cost * index / MAX_COST).toHex();
   }
 
   grid
     .traverse(path ?? [])
-    .filter((tile) => !tile.equals([startTile.q, startTile.r]))
     .forEach((tile) => {
       const fill = getTileFill(tile, pathColorRange);
-      const animationStep = easeInCubic(index / path.length) * 1000;
-      tile.svgPolygon.animate(200, animationStep, 'start').fill(fill)
-      tile.svgPolygon.animate(1, animationStep, 'start').opacity(0.4)
+      const animationStep = easeInQuad(index / path.length) * 1000;
+      tile.svgPolygon.animate(300, animationStep, 'now').fill(fill)
+      tile.svgPolygon.animate(5, animationStep, 'now').opacity(0.4)
       tile.svgGroup.addClass("path-painted")
       index++;
       totalCost += tile.cost;
     })
+    totalCost--;
 
   // path.filter((tile) => !tile.equals([start.q, start.r]))
   //   .forEach((tile) => {
@@ -51,7 +50,7 @@ export function paintTraversablePath(grid: Grid<HexTile>, path: HexTile[]) {
   return path ?? [];
 }
 
-export function unpaintTraversablePath(path: Iterable<HexTile>) {
+export function unpaintTraversablePath<T extends HexTile>(path: Iterable<T>) {
   for (let tile of path) {
     
     tile.svgPolygon.attr({ fill: 'none', opacity: 1 })
@@ -62,8 +61,8 @@ export function unpaintTraversablePath(path: Iterable<HexTile>) {
 
 
 /** source: https://easings.net/#easeInCubic */
-function easeInCubic(x: number): number {
-  return x * x * x;
+function easeInQuad(x: number): number {
+  return x * x;
 }
 
 function renderText(tile: HexTile, text: string) {
