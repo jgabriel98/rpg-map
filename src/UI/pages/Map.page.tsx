@@ -4,7 +4,7 @@ import { Suspense, type Component } from 'solid-js';
 import { buckets, supabase } from '~/lib/supabase';
 import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
-import Loading from '../components/Loading.component';
+import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
 
 type MapRouteParams = {
   id: string
@@ -18,7 +18,7 @@ const Map: Component = () => {
 
   return (
     <HexGridProvider>
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<LoadingSpinner />}>
         <Switch>
           <Match when={mapConfig()}>
             <HexMap backgroundSrc={mapConfig()!.background_url} tileRadius={mapConfig()!.hex_tile_radius} tileCost={mapConfig()!.tile_cost} />
