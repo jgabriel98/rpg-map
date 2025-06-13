@@ -1,17 +1,18 @@
 /* @refresh reload */
 import { Route, Router, useNavigate } from "@solidjs/router";
-import { lazy, ParentComponent, ParentProps, Suspense } from 'solid-js';
+import { Component, lazy, ParentComponent, ParentProps, Suspense } from 'solid-js';
 import { render } from 'solid-js/web';
 
 import { SessionProvider } from './contexts/Session.context';
 import { supabase } from "./lib/supabase";
+import Loading from "./UI/components/loading/Loading.component";
 import Auth from './UI/pages/Auth.page';
 import CreateMap from './UI/pages/CreateMap.page';
 import Map from './UI/pages/Map.page';
 import Maps from './UI/pages/Maps.page';
 
 import './index.css';
-import Loading from "./UI/components/Loading.component";
+import ThemeProvider from "./UI/providers/ThemeProvider";
 
 const root = document.getElementById('root');
 
@@ -22,13 +23,13 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 }
 
 const AuthGuard: ParentComponent = ({ children }) => {
-
   const AsyncSessionChecker = lazy(async () => {
     const navigate = useNavigate();
-    const { data } = await supabase.auth.getSession();
+    const { session } = (await supabase.auth.getSession()).data;
+    // const session = useSession();
 
-    console.log('getting  session', data.session)
-    if (data.session === null) navigate('/auth', { replace: true });
+    console.log('getting session', session)
+    if (session === null) navigate('/auth', { replace: true });
 
     return {
       default: ({ children }: ParentProps) => children
@@ -40,19 +41,24 @@ const AuthGuard: ParentComponent = ({ children }) => {
   </Suspense>
 }
 
+const withAuthGuard = <P extends Record<string, any>>(Component: Component<P>): Component<P> => {
+  return (props: P) => <AuthGuard>
+    <Component {...props} />
+  </AuthGuard>
+}
 
 // SUGESTÃO PARA ROTAS AUTENTICADAS: https://github.com/solidjs/solid-router/discussions/364#discussioncomment-11537405
 render(() => (
   <SessionProvider>
-    <Router>
+    <Router root={ThemeProvider}>
       <Route path={['/auth', '/auth/confirm']} component={Auth} />
 
-        <Route path='/' component={AuthGuard}>
-          <Route path='/' component={Maps} />
-          <Route path='/maps' component={Maps} />
-          <Route path='/maps/:id' component={Map} />
-          <Route path='/maps/create' component={CreateMap} />
-        </Route>
+      <Route path='/' component={AuthGuard}>
+        <Route path='/' component={Maps} />
+        <Route path='/maps' component={Maps} />
+        <Route path='/maps/:id' component={Map} />
+        <Route path='/maps/create' component={CreateMap} />
+      </Route>
 
     </Router>
   </SessionProvider>
