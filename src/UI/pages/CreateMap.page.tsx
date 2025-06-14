@@ -1,14 +1,16 @@
-import { createEffect, createSignal, createUniqueId, type Component } from 'solid-js';
-
 import { fileUploader, UploadFile } from '@solid-primitives/upload';
-import { buckets, supabase } from '~/lib/supabase';
-import { useSession } from '~/contexts/Session.context';
-import { Tables } from '~/lib/supabase/database.types';
 import { useNavigate } from '@solidjs/router';
-import { Show } from 'solid-js';
+import { createSignal, Show, type Component } from 'solid-js';
+
+import { useSession } from '~/contexts/Session.context';
+import { buckets } from '~/lib/supabase';
+import { Tables } from '~/lib/supabase/database.types';
+import { deleteMap, insertMap, updateMap } from '~/services/map';
 import { HexMap } from '../components/HexMap.component';
 import { HexGridProvider } from '../directives';
+import MapEditGUI from '../components/MapEditGUI.component';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 fileUploader; // Preserve the import.
 
 const uploadToBucket = async (userId: string, mapId: MapId, file: File) => {
@@ -16,21 +18,19 @@ const uploadToBucket = async (userId: string, mapId: MapId, file: File) => {
   const { data, error } = await buckets.mapsAssets.upload(path, file);
   if (error) throw error;
   return data;
-}
+};
 
 const updateMapBackgroundUrl = async (id: MapId, backgroundUrl: string) => {
-  const { data, error } = await supabase.from('maps')
-    .update({ background_url: backgroundUrl })
-    .eq('id', id)
+  const { data, error } = await updateMap(id, { background_url: backgroundUrl });
   if (error) throw error;
   return data;
-}
+};
 
 type MapId = Tables<'maps'>['id'];
 
 const CreateMap: Component = () => {
   const [files, setFiles] = createSignal<UploadFile[]>([]);
-  const backgroundImageFile = () => files().at(0)
+  const backgroundImageFile = () => files().at(0);
   const [tileRadius, setTileRadius] = createSignal(25);
   const [tileCost, setTileCost] = createSignal(1);
 
@@ -42,68 +42,55 @@ const CreateMap: Component = () => {
     const [backgroundFile] = files();
     if (!backgroundFile) return;
 
-    const { data, error } = await supabase.from('maps').insert({
+    // TODO: migrate all this logic to rpc {@link https://supabase.com/docs/reference/javascript/rpc}
+    const { data, error } = await insertMap({
       hex_tile_radius: tileRadius(),
       tile_cost: tileCost(),
       background_url: ""
-    }).select('id').single();
+    });
+
     if (error) throw error;
 
     const mapId = data.id;
     try {
-      const { path } = await uploadToBucket(session()!.user.id, mapId, backgroundFile.file)
+      const { path } = await uploadToBucket(session()!.user.id, mapId, backgroundFile.file);
 
-      try { await updateMapBackgroundUrl(mapId, path) }
+      try { await updateMapBackgroundUrl(mapId, path); }
       catch (err) {
         buckets.mapsAssets.remove([path]);
         throw err;
       }
 
     } catch (err) {
-      supabase.from('maps').delete().eq('id', mapId);
+      deleteMap(mapId);
       throw err;
     }
 
-    navigate('/maps', { replace: true })
-  }
+    navigate('/maps', { replace: true });
+  };
 
   return (
     <HexGridProvider>
-      <div style={{ position: 'absolute', display: 'flex', "flex-direction": "column" }}>
+      <div class='z-10 absolute flex flex-col'>
         <div>
-        <label for="files" class="btn">Envie a imagem de fundo do mapa: </label>
-        <input
-          type="file"
-          accept='image/*'
-          multiple={false}
-          use:fileUploader={{
-            userCallback: _ => { },
-            setFiles,
-          }}
-        />
+          <label for="files" class="btn">Envie a imagem de fundo do mapa: </label>
+          <input
+            type="file"
+            accept='image/*'
+            multiple={false}
+            use:fileUploader={{
+              userCallback: (_) => { },
+              setFiles,
+            }}
+          />
         </div>
 
-        <div>
-          <span>Tamanho do bloco: </span>
-          <span>{tileRadius()} </span>
-
-          <button on:click={() => setTileRadius(tileRadius() + 1)}>+</button>
-          <button on:click={() => setTileRadius(Math.max(tileRadius() - 1, 0))}>-</button>
-        </div>
-
-        <div>
-          <span>Custo de movimento por bloco: </span>
-          <span>{tileCost()} </span>
-
-          <button on:click={() => setTileCost(tileCost() + 1)}>+</button>
-          <button on:click={() => setTileCost(Math.max(tileCost() - 1, 0))}>-</button>
-
-        </div>
+        <MapEditGUI tileCost={tileCost()} tileRadius={tileRadius()} onSetTileCost={setTileCost} onSetTileRadius={setTileRadius} />
         <button on:click={submit}>salvar</button>
 
       </div>
       <Show when={backgroundImageFile()?.source}>
-        <HexMap backgroundSrc={backgroundImageFile()!.source} tileRadius={tileRadius()} tileCost={tileCost()}/>
+        <HexMap backgroundSrc={backgroundImageFile()!.source} tileRadius={tileRadius()} tileCost={tileCost()} />
       </Show>
     </HexGridProvider>
   );

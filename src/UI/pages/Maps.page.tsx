@@ -2,49 +2,38 @@ import { A, createAsync, query, useNavigate } from '@solidjs/router';
 import { User } from '@supabase/supabase-js';
 import PencilRuler from 'lucide-solid/icons/pencil-ruler';
 import Trash2Icon from 'lucide-solid/icons/trash-2';
-import { For, Suspense, type Component } from 'solid-js';
+import { For, mergeProps, Show, Suspense, type Component } from 'solid-js';
 import { useSession } from '~/contexts/Session.context';
 import { Button } from '~/lib/solidui/button';
-import { Separator } from '~/lib/solidui/separator';
-import { buckets, supabase } from '~/lib/supabase';
-import { Tables } from '~/lib/supabase/database.types';
-import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
-import { Show } from 'solid-js';
 import { Flex } from '~/lib/solidui/flex';
+import { Separator } from '~/lib/solidui/separator';
+import { Tables } from '~/lib/supabase/database.types';
+import { fetchMaps } from '~/services/map';
+import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
 
-const MapPreview: Component<{ map: Tables<'maps'>, owner?: boolean }> = ({ map, owner = false }) => {
-  const navigate = useNavigate()
+const MapPreview: Component<{ map: Tables<'maps'>, owner?: boolean; }> = (_props) => {
+  const props = mergeProps({ owner: false }, _props);
+  const editRoute = `/maps/${props.map.id}/edit`;
+  const navigate = useNavigate();
   return (
-    <div on:click={() => navigate(`/maps/${map.id}`)}>
-      <h2>Map ID: {map.id}</h2>
-      <p>Created at: {new Date(map.created_at).toLocaleString()}</p>
-      <img src={map.background_url!} alt={`Map ${map.id}`} />
-      <Show when={owner}>
+    <div on:click={() => navigate(`/maps/${props.map.id}`)}>
+      <h2>Map ID: {props.map.id}</h2>
+      <p>Created at: {new Date(props.map.created_at).toLocaleString()}</p>
+      <img src={props.map.background_url!} alt={`Map ${props.map.id}`} />
+      <Show when={props.owner}>
         <div class='flex space-x-2'>
-          <Button variant="secondary"><PencilRuler /></Button>
+          <Button variant="secondary" as={A} href={editRoute}><PencilRuler /></Button>
           <Button variant="destructive"><Trash2Icon /></Button>
         </div>
       </Show>
     </div>
   );
-}
+};
 
 const getAllMaps = query(async (user?: User) => {
   if (!user) return;
-
-  let { data, count, error } = await supabase.from("maps").select()
-
-  data?.forEach(map => {
-    map.background_url = buckets.mapsAssets.getPublicUrl(map.background_url!, {
-      transform: {
-        height: 300, width: 300,
-        resize: 'contain'
-      }
-    }).data.publicUrl;
-  })
-
-  return { data, count, error };
-}, "maps")
+  return await fetchMaps();
+}, "maps");
 
 
 const Maps: Component = () => {
