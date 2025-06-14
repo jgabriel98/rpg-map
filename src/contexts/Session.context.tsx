@@ -8,22 +8,21 @@ const SessionContext = createContext<Accessor<AuthSession | null>>(() => null);
 
 export const SessionProvider: ParentComponent = (props) => {
   const [session, setSession] = createSignal<AuthSession | null>(null);
-  let subscription: Subscription;  
 
   const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
     // workarround for firing event on every tab focus: https://github.com/supabase/auth-js/issues/579
     if (newSession?.expires_at !== session()?.expires_at) {
-      console.log('auth state changed!', _event, newSession)
+      console.log('auth state changed!', _event, newSession);
       setSession(newSession);
     }
-  })
-  subscription = data.subscription;
+  });
+  const subscription: Subscription = data.subscription;
 
   onCleanup(() => subscription.unsubscribe());
 
-  return <SessionContext.Provider children={props.children} value={session} />
-}
+  return <SessionContext.Provider children={props.children} value={session} />;
+};
 
 export const useSession = () => {
-  return useContext(SessionContext)
+  return useContext(SessionContext);
 };
