@@ -7,6 +7,8 @@ import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
 import MapEditGUI from '../components/MapEditGUI.component';
+import { createSignal } from 'solid-js';
+import { Button } from '~/lib/solidui/button';
 
 type EditMapRouteParams = {
   id: string;
@@ -20,11 +22,15 @@ const EditMap: Component = () => {
   const [tileRadius, setTileRadius] = createAsyncSignal(() => mapQuery()?.data?.hex_tile_radius);
   const [tileCost, setTileCost] = createAsyncSignal(() => mapQuery()?.data?.tile_cost);
 
+  const [isLoading, setIsLoading] = createSignal(false);
+
   const onSubmit = async () => {
+    setIsLoading(true);
     await updateMap(id, {
       hex_tile_radius: tileRadius(),
       tile_cost: tileCost()
     });
+    setIsLoading(false);
   };
 
   return (
@@ -37,8 +43,10 @@ const EditMap: Component = () => {
               tileRadius={tileRadius()!}
               onSetTileCost={setTileCost}
               onSetTileRadius={setTileRadius}
-              onSubmit={onSubmit}
             />
+            <Button onClick={onSubmit} disabled={isLoading()} class='self-center mt-3'>
+              {isLoading() ? <LoadingSpinner /> : "Salvar"}
+            </Button>
           </div>
           <HexMap backgroundSrc={backgroundUrl()!} tileRadius={tileRadius()!} tileCost={tileCost()!} />
         </Suspense>

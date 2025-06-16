@@ -1,43 +1,38 @@
-import { createSignal, type Component } from 'solid-js';
-import { Button } from '~/lib/solidui/button';
-import { LoadingSpinner } from './loading/LoadingSpinner.component';
+import { type Component } from 'solid-js';
+import { Flex } from '~/lib/solidui/flex';
+import { NumberField, NumberFieldDecrementTrigger, NumberFieldGroup, NumberFieldIncrementTrigger, NumberFieldInput, NumberFieldLabel } from '~/lib/solidui/number-field';
+import { Separator } from '~/lib/solidui/separator';
 
 interface MapEditGUIProps {
   tileRadius: number;
   onSetTileRadius: (v: number) => void;
   tileCost: number;
   onSetTileCost: (v: number) => void;
-  onSubmit: () => Promise<void>;
 }
 
 const MapEditGUI: Component<MapEditGUIProps> = (props) => {
-  const [isLoading, setIsLoading] = createSignal(false);
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    await props.onSubmit();
-    setIsLoading(false);
-  };
-
   return <>
-    <div>
-      <span>Tamanho do bloco: </span>
-      <span>{props.tileRadius} </span>
+    <Flex justifyContent='between' alignItems='center' class='gap-3'>
+      <NumberField class="w-36" minValue={5} rawValue={props.tileRadius} onRawValueChange={props.onSetTileRadius}>
+        <NumberFieldLabel>Tamanho do bloco</NumberFieldLabel>
+        <NumberFieldGroup>
+          <NumberFieldInput />
+          <NumberFieldIncrementTrigger />
+          <NumberFieldDecrementTrigger />
+        </NumberFieldGroup>
+      </NumberField>
 
-      <button on:click={() => props.onSetTileRadius(props.tileRadius + 1)}>+</button>
-      <button on:click={() => props.onSetTileRadius(Math.max(props.tileRadius - 1, 0))}>-</button>
-    </div>
+      <Separator orientation="vertical" class='h-1/2 self-end mb-1' />
 
-    <div>
-      <span>Custo de movimento por bloco: </span>
-      <span>{props.tileCost} </span>
-
-      <button on:click={() => props.onSetTileCost(props.tileCost + 1)}>+</button>
-      <button on:click={() => props.onSetTileCost(Math.max(props.tileCost - 1, 0))}>-</button>
-    </div>
-
-    <Button onClick={handleSubmit} disabled={isLoading()}>
-      {isLoading() ? <LoadingSpinner /> : "Salvar"}
-    </Button>
+      <NumberField class="w-36" minValue={0} rawValue={props.tileCost} onRawValueChange={props.onSetTileCost}>
+        <NumberFieldLabel>Custo de movimento</NumberFieldLabel>
+        <NumberFieldGroup>
+          <NumberFieldInput />
+          <NumberFieldIncrementTrigger />
+          <NumberFieldDecrementTrigger />
+        </NumberFieldGroup>
+      </NumberField>
+    </Flex>
   </>;
 };
 
