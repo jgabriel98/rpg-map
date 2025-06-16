@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import createPanZoom, { PanZoom } from "panzoom";
-import { Accessor, createEffect, createRenderEffect, createSignal, onCleanup, onMount } from "solid-js";
-import { listenToMouseClick } from "../../lib/mouse";
+import { Accessor, createEffect, createRenderEffect, createSignal, onCleanup } from "solid-js";
 
 declare module "solid-js" {
   namespace JSX {
     interface Directives {
-      panZoom: PanZoomOptions
+      panZoom: PanZoomOptions;
     }
   }
 }
@@ -22,11 +22,11 @@ function getEdgeDistance(elementRect: DOMRect) {
     left: -elementRect.left,
     right: (elementRect.x + elementRect.width - document.documentElement.clientWidth),
     bottom: (elementRect.y + elementRect.height - document.documentElement.clientHeight)
-  }
+  };
 }
 
 export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOptions>) {
-  let [panZoomInstance, setPanZoomInstance] = createSignal<PanZoom>();
+  const [panZoomInstance, setPanZoomInstance] = createSignal<PanZoom>();
 
   createRenderEffect(() => {
     if (options()?.enable) {
@@ -35,7 +35,7 @@ export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOpt
         boundsPadding: 0.5,
         beforeWheel: (e) => {
           // allow wheel-zoom only if cmd|ctrl is down. Otherwise - ignore
-          var shouldIgnore = !(e.metaKey || e.ctrlKey);
+          const shouldIgnore = !(e.metaKey || e.ctrlKey);
           return shouldIgnore;
         },
         // disables doubleClick zoom (source: https://github.com/anvaka/panzoom?tab=readme-ov-file#adjust-double-click-zoom)
@@ -54,7 +54,7 @@ export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOpt
   onCleanup(() => panZoomInstance()?.dispose());
 
 
-  const adjustTransformToBounds = (e : PanZoom, smooth = true) => {
+  const adjustTransformToBounds = (e: PanZoom, smooth = true) => {
     const elementRect = elRef.getBoundingClientRect();
 
     const edgesDistance = getEdgeDistance(elementRect);
@@ -66,31 +66,31 @@ export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOpt
     const translateFix = {
       x: e.getTransform().x,
       y: e.getTransform().y
-    }
+    };
 
     if (isYFullScreen) {
-      if (edgesDistance.top < 0) translateFix.y += edgesDistance.top
-      if (edgesDistance.bottom < 0) translateFix.y += -edgesDistance.bottom
+      if (edgesDistance.top < 0) translateFix.y += edgesDistance.top;
+      if (edgesDistance.bottom < 0) translateFix.y += -edgesDistance.bottom;
     } else {
       // if (edgesDistance.top > 0) translateFix.y += edgesDistance.top
       // else if (edgesDistance.bottom > 0) translateFix.y += -edgesDistance.bottom
       // if there is no Y-axis overlap, neither bottom or top
-      translateFix.y = (document.documentElement.clientHeight - elementRect.height) / 2
+      translateFix.y = (document.documentElement.clientHeight - elementRect.height) / 2;
     }
 
     if (isXFullScreen) {
-      if (edgesDistance.left < 0) translateFix.x += edgesDistance.left
-      if (edgesDistance.right < 0) translateFix.x += -edgesDistance.right
+      if (edgesDistance.left < 0) translateFix.x += edgesDistance.left;
+      if (edgesDistance.right < 0) translateFix.x += -edgesDistance.right;
     } else {
       // if (edgesDistance.left > 0) translateFix.x += edgesDistance.left
       // else if (edgesDistance.right > 0) translateFix.x += -edgesDistance.right
       // if there is no X-axis overlap, neither left or right
-      translateFix.x = (document.documentElement.clientWidth - elementRect.width) / 2
+      translateFix.x = (document.documentElement.clientWidth - elementRect.width) / 2;
     }
 
     if (smooth) e.smoothMoveTo(translateFix.x, translateFix.y);
     else e.moveTo(translateFix.x, translateFix.y);
-  }
+  };
 
 
   createEffect(() => {
@@ -98,8 +98,8 @@ export default function panZoom(elRef: HTMLElement, options: Accessor<PanZoomOpt
     if (!_panZoomInstance) return;
 
     _panZoomInstance.on('panend', (e: PanZoom) => {
-      adjustTransformToBounds(e)
-    })
-  })
+      adjustTransformToBounds(e);
+    });
+  });
 
 }

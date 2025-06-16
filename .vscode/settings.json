@@ -16,5 +16,14 @@
   "editor.wordWrap": "off",
   "editor.defaultFormatter": null,
   "typescript.preferences.quoteStyle": "single",
-  "typescript.inlayHints.functionLikeReturnTypes.enabled": false
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
+  "telemetry.feedback.enabled": false,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "./supabase/**": true,
+    "**/*-lock.*": true
+  },
+  "npm.packageManager": "npm"
 }

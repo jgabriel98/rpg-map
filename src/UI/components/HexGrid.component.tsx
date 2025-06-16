@@ -1,15 +1,15 @@
-import { Component, createEffect, createMemo, createRenderEffect, createSignal, onCleanup, onMount, Show, useContext } from "solid-js";
+import { Component, createEffect, createMemo, onCleanup, onMount, useContext } from "solid-js";
 // import { ReactiveSet, ReactiveWeakSet } from "@solid-primitives/set";
 
-import { panZoom, useHexGrid } from "../directives";
-import styles from './HexMap.module.css';
-import { listenToMouseClick, MouseEventWithDrag } from "~/lib/mouse";
-import { defineHexTile } from "~/models/HexTile.model";
-import { HexGridContext } from "~/contexts/HexGrid.context";
 import { rectangle } from "honeycomb-grid";
+import { HexGridContext } from "~/contexts/HexGrid.context";
+import { listenToMouseClick, MouseEventWithDrag } from "~/lib/mouse";
 import HexGridModel from "~/models/HexGrid.model";
+import { defineHexTile } from "~/models/HexTile.model";
+import { panZoom } from "../directives";
+import styles from './HexMap.module.css';
 
-
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 panZoom;// Preserve the import.
 
 
@@ -22,28 +22,28 @@ const HEX_HORIZONTAL_RATIO = 4 / 3; // ratio of hexagon width to quantity of hex
 
 export const HexGrid: Component<HexGridProps> = (props) => {
   let elRef!: HTMLDivElement;
-  const context = useContext(HexGridContext)
-  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: props.tileRadius, cost: props.costPerTile }))
+  const context = useContext(HexGridContext);
+  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: props.tileRadius, cost: props.costPerTile }));
 
   function onHexClick({ offsetX, offsetY, isDrag }: MouseEventWithDrag) {
-    const hex = context!.grid()!.pointToHex({ x: offsetX, y: offsetY }, { allowOutside: false })
+    const hex = context!.grid()!.pointToHex({ x: offsetX, y: offsetY }, { allowOutside: false });
     if (!hex) return;
 
     if (!isDrag) {
       const shouldUnselect = hex.selected;
-      context?.selectTile(hex, shouldUnselect)
+      context?.selectTile(hex, shouldUnselect);
     }
   }
 
-  createEffect(() => { 
+  createEffect(() => {
     if (!context) throw new Error("use:hexGrid must be used inside a HexGridProvider");
-    const CustomHexTile = CustomHexTileClass()
+    const CustomHexTile = CustomHexTileClass();
 
     // const parentBox = elRef.parentElement!.getBoundingClientRect();
     const parentBox = {
       width: parseInt(getComputedStyle(elRef.parentElement!).width),
       height: parseInt(getComputedStyle(elRef.parentElement!).height)
-    }
+    };
 
     const tile = new CustomHexTile();
     const howManyPixelsPerTile = {
@@ -60,12 +60,12 @@ export const HexGrid: Component<HexGridProps> = (props) => {
       grid.setRenderMount(elRef);
       grid.render();
       return grid;
-    })
+    });
   });
 
   let removeMouseClickListener: ReturnType<typeof listenToMouseClick>;
-  onMount(() => { removeMouseClickListener = listenToMouseClick(elRef, onHexClick) })
-  onCleanup(() => { removeMouseClickListener() })
+  onMount(() => { removeMouseClickListener = listenToMouseClick(elRef, onHexClick); });
+  onCleanup(() => { removeMouseClickListener(); });
 
-  return <div ref={elRef} class={styles.hexGrid}  />
-}
+  return <div ref={elRef} class={styles.hexGrid} />;
+};

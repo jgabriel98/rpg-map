@@ -1,6 +1,6 @@
-import css from "@eslint/css";
+// import css from "@eslint/css";
 import js from "@eslint/js";
-import json from "@eslint/json";
+// import json from "@eslint/json";
 import * as tsParser from "@typescript-eslint/parser";
 import solid from "eslint-plugin-solid/configs/typescript";
 import { defineConfig } from "eslint/config";
@@ -27,12 +27,13 @@ export default defineConfig([
           "varsIgnorePattern": "^_[^_].*$|^_$",
           "caughtErrorsIgnorePattern": "^_[^_].*$|^_$"
         }
-      ]
+      ],
+      "@typescript-eslint/no-explicit-any": 0
     }
   },
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], plugins: { js }, extends: ["js/recommended"] },
+  // { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], plugins: { js }, extends: ["js/recommended"] },
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: { globals: globals.browser } },
   tseslint.configs.recommended,
-  { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
-  { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
+  // { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
+  // { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
 ],);

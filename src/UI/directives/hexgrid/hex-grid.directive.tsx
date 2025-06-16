@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { rectangle } from "honeycomb-grid";
 import { Accessor, createMemo, createRenderEffect, onCleanup, onMount, useContext } from "solid-js";
 import { listenToMouseClick, MouseEventWithDrag } from "~/lib/mouse";
@@ -8,7 +9,7 @@ import { HexGridContext } from "~/contexts/HexGrid.context";
 declare module "solid-js" {
   namespace JSX {
     interface Directives {
-      hexGrid: HexGridOptions
+      hexGrid: HexGridOptions;
     }
   }
 }
@@ -18,7 +19,7 @@ type HexGridOptions = {
   tileRadius: number;
   /** defaults to 1 */
   costPerTile?: number;
-  onClick?: (hex: HexTile) => void
+  onClick?: (hex: HexTile) => void;
 };
 
 
@@ -26,16 +27,16 @@ const HEX_HORIZONTAL_RATIO = 4 / 3; // ratio of hexagon width to quantity of hex
 
 /** @deprecated use HexGrid component instead */
 export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOptions>) {
-  const context = useContext(HexGridContext)
-  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: options().tileRadius, cost: options().costPerTile }))
+  const context = useContext(HexGridContext);
+  const CustomHexTileClass = createMemo(() => defineHexTile({ dimensions: options().tileRadius, cost: options().costPerTile }));
 
   function onHexClick({ offsetX, offsetY, isDrag }: MouseEventWithDrag) {
-    const hex = context!.grid()!.pointToHex({ x: offsetX, y: offsetY }, { allowOutside: false })
+    const hex = context!.grid()!.pointToHex({ x: offsetX, y: offsetY }, { allowOutside: false });
     if (!hex) return;
 
     if (!isDrag) {
       const shouldUnselect = hex.selected;
-      context?.selectTile(hex, shouldUnselect)
+      context?.selectTile(hex, shouldUnselect);
       options().onClick?.(hex);
     }
   }
@@ -43,13 +44,13 @@ export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOpt
   createRenderEffect(() => {
     if (!options().enable) return;
     if (!context) throw new Error("use:hexGrid must be used inside a HexGridProvider");
-    const CustomHexTile = CustomHexTileClass()
+    const CustomHexTile = CustomHexTileClass();
 
     // const parentBox = elRef.parentElement!.getBoundingClientRect();
     const parentBox = {
       width: parseInt(getComputedStyle(elRef.parentElement!).width),
       height: parseInt(getComputedStyle(elRef.parentElement!).height)
-    }
+    };
 
     const tile = new CustomHexTile();
     const howManyPixelsPerTile = {
@@ -66,10 +67,10 @@ export default function hexGrid(elRef: HTMLElement, options: Accessor<HexGridOpt
       grid.setRenderMount(elRef);
       grid.render();
       return grid;
-    })
+    });
   });
 
   let removeMouseClickListener: ReturnType<typeof listenToMouseClick>;
-  onMount(() => { removeMouseClickListener = listenToMouseClick(elRef, onHexClick) })
-  onCleanup(() => { removeMouseClickListener() })
+  onMount(() => { removeMouseClickListener = listenToMouseClick(elRef, onHexClick); });
+  onCleanup(() => { removeMouseClickListener(); });
 }

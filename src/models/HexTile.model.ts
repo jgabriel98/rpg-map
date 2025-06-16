@@ -1,17 +1,15 @@
-import { Element, FillData, G, Image, Polygon } from "@svgdotjs/svg.js";
-import { ArrayXY } from "@svgdotjs/svg.js";
-import { Svg } from "@svgdotjs/svg.js";
-import { BoundingBox, createHexDimensions, createHexOrigin, defaultHexSettings, defineHex, Ellipse, Hex, HexCoordinates, HexOffset, HexOptions, Orientation, Point } from "honeycomb-grid"
+import { ArrayXY, Element, FillData, G, Image, Polygon, Svg } from "@svgdotjs/svg.js";
+import { BoundingBox, createHexDimensions, createHexOrigin, defaultHexSettings, Ellipse, Hex, HexOffset, HexOptions, Orientation, Point } from "honeycomb-grid";
 
-import "./HexTile.css"
+import "./HexTile.css";
 
 type RenderSVGOptions = {
-  fill?: FillData | string | Element | Image
-}
+  fill?: FillData | string | Element | Image;
+};
 
 class HexTile extends Hex {
   private _svgGroup?: G;
-  private _svgPolygon?: Polygon
+  private _svgPolygon?: Polygon;
 
   private _selected: boolean = false;
   /** pathfinding cost */
@@ -42,7 +40,7 @@ class HexTile extends Hex {
       svgCanvas
         // create a polygon from a hex's corner points
         .polygon(this.corners.map(({ x, y }) => [x, y] as ArrayXY))
-        // @ts-ignore
+        // @ts-expect-error: the library type definition is wrong
         .fill(options.fill ?? 'none')
         .stroke({ width: 2, color: 'black', opacity: 0.075, linejoin: 'round' });
 
@@ -54,8 +52,8 @@ class HexTile extends Hex {
 export type { HexTile };
 
 type HexTileOptions = HexOptions & {
-  cost: number
-}
+  cost: number;
+};
 
 const defaultHexTileSettings = {
   ...defaultHexSettings,
@@ -70,22 +68,22 @@ export function defineHexTile(hexTileOptions?: Partial<HexTileOptions>): typeof 
   const { dimensions, orientation, origin, offset } = options;
 
   return class extends HexTile {
-    public cost = options.cost
+    public cost = options.cost;
 
     get dimensions(): Ellipse {
-      return createHexDimensions(dimensions as BoundingBox, orientation)
+      return createHexDimensions(dimensions as BoundingBox, orientation);
     }
 
     get orientation(): Orientation {
-      return orientation
+      return orientation;
     }
 
     get origin(): Point {
-      return createHexOrigin(origin as 'topLeft', this)
+      return createHexOrigin(origin as 'topLeft', this);
     }
 
     get offset(): HexOffset {
-      return offset
+      return offset;
     }
-  }
+  };
 }
