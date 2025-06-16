@@ -1,58 +1,45 @@
-import { A, createAsync, query, useNavigate } from '@solidjs/router';
-import { User } from '@supabase/supabase-js';
-import PencilRuler from 'lucide-solid/icons/pencil-ruler';
-import Trash2Icon from 'lucide-solid/icons/trash-2';
-import { For, mergeProps, Show, Suspense, type Component } from 'solid-js';
+import { A } from '@solidjs/router';
+import { For, Suspense, type Component } from 'solid-js';
 import { useSession } from '~/contexts/Session.context';
 import { Button } from '~/lib/solidui/button';
 import { Flex } from '~/lib/solidui/flex';
 import { Separator } from '~/lib/solidui/separator';
+import { showToast } from '~/lib/solidui/toast';
 import { Tables } from '~/lib/supabase/database.types';
-import { fetchMaps } from '~/services/map';
+import { deleteMap, queryMaps } from '~/services/map';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
-
-const MapPreview: Component<{ map: Tables<'maps'>, owner?: boolean; }> = (_props) => {
-  const props = mergeProps({ owner: false }, _props);
-  const editRoute = `/maps/${props.map.id}/edit`;
-  const navigate = useNavigate();
-  return (
-    <div on:click={() => navigate(`/maps/${props.map.id}`)}>
-      <h2>Map ID: {props.map.id}</h2>
-      <p>Created at: {new Date(props.map.created_at).toLocaleString()}</p>
-      <img src={props.map.background_url!} alt={`Map ${props.map.id}`} />
-      <Show when={props.owner}>
-        <div class='flex space-x-2'>
-          <Button variant="secondary" as={A} href={editRoute}><PencilRuler /></Button>
-          <Button variant="destructive"><Trash2Icon /></Button>
-        </div>
-      </Show>
-    </div>
-  );
-};
-
-const getAllMaps = query(async (user?: User) => {
-  if (!user) return;
-  return await fetchMaps();
-}, "maps");
+import MapPreview from '../components/MapPreview.component';
 
 
 const Maps: Component = () => {
   const session = useSession();
-  const allMapsQuery = createAsync(() => getAllMaps(session()?.user));
+  const [allMapsQuery, { deleteMutation: deleteMapMutation }] = queryMaps(session()?.user);
 
   const userMaps = () => allMapsQuery()?.data?.filter(map => map.owner_id == session()?.user.id);
   const otherUsersMaps = () => allMapsQuery()?.data?.filter(map => map.owner_id != session()?.user.id);
+
+  const onDeleteMap = async (mapId: number) => {
+    const { error } = await deleteMap(mapId);
+
+    if (error) showToast({
+      variant: 'warning',
+      title: 'Falha ao deletar mapa',
+      description: JSON.stringify(error)
+    });
+    else showToast({
+      variant: 'destructive',
+      title: `Mapa ${mapId} foi deletado`
+    });
+
+    deleteMapMutation(mapId);
+  };
 
   return <Suspense fallback={<LoadingSpinner class='size-32 m-auto' />} >
     <Flex flexDirection="col" class="px-6">
       <h2 class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Seus mapas
       </h2>
-      <div style={{ display: 'flex', "flex-direction": "row" }}>
-        <For each={userMaps()} fallback={<span class="text-neutral-400">Nenhum mapa cadastrado.</span>}>
-          {(map) => <MapPreview map={map} owner />}
-        </For>
-      </div>
+      <MapList writable maps={userMaps()} onDeleteMap={onDeleteMap} />
       <Button as={A} href='/maps/create' class="max-w-md w-full justify-self-center my-3">Criar novo mapa</Button>
 
       <Separator class='border-amber-500 border-2 w-4/5 my-12 mx-auto rounded-sm' />
@@ -60,13 +47,29 @@ const Maps: Component = () => {
       <h2 class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Mapas de colegas
       </h2>
-      <div class='flex flex-row space-x-4'>
-        <For each={otherUsersMaps()} fallback={<span class="text-neutral-400">Nenhum mapa cadastrado.</span>}>
-          {(map) => <MapPreview map={map} />}
-        </For>
-      </div>
+      <MapList maps={otherUsersMaps()} />
     </Flex>
   </Suspense>;
+};
+
+type MapListProps = {
+  maps?: Tables<'maps'>[];
+  writable?: false;
+} | {
+  maps?: Tables<'maps'>[];
+  writable: true;
+  onDeleteMap: (mapId: number) => void;
+};
+
+const MapList: Component<MapListProps> = (props) => {
+  return <div class='flex flex-row flex-wrap gap-6'>
+    <For each={props.maps} fallback={<span class="text-neutral-400">Nenhum mapa encontrado.</span>}>
+      {(map) => {
+        if (!props.writable) return <MapPreview map={map} writable={props.writable} />;
+        return <MapPreview map={map} writable={props.writable} onDeleteMap={() => props.onDeleteMap(map.id)} />;
+      }}
+    </For>
+  </div>;
 };
 
 export default Maps;

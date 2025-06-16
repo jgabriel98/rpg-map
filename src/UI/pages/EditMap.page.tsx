@@ -1,7 +1,8 @@
 import { createAsync, useParams } from '@solidjs/router';
-import { batch, createComputed, createSignal, ErrorBoundary, Show, type Component } from 'solid-js';
+import { ErrorBoundary, Suspense, type Component } from 'solid-js';
 
-import { fetchMap } from '~/services/map';
+import { createAsyncSignal } from '~/lib/solidjs-helpers';
+import { fetchMap, updateMap } from '~/services/map';
 import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
@@ -15,30 +16,32 @@ const EditMap: Component = () => {
   const { id } = useParams<EditMapRouteParams>();
   const mapQuery = createAsync(() => fetchMap(id));
 
-  const [backgroundUrl, setBackgroundUrl] = createSignal<string>();
-  const [tileRadius, setTileRadius] = createSignal<number>();
-  const [tileCost, setTileCost] = createSignal<number>();
+  const [backgroundUrl,] = createAsyncSignal(() => mapQuery()?.data?.background_url);
+  const [tileRadius, setTileRadius] = createAsyncSignal(() => mapQuery()?.data?.hex_tile_radius);
+  const [tileCost, setTileCost] = createAsyncSignal(() => mapQuery()?.data?.tile_cost);
 
-  createComputed(() => {
-    const data = mapQuery()?.data;
-    if (!data) return;
-
-    batch(() => {
-      setBackgroundUrl(data.background_url);
-      setTileRadius(data.hex_tile_radius);
-      setTileCost(data.tile_cost);
+  const onSubmit = async () => {
+    await updateMap(id, {
+      hex_tile_radius: tileRadius(),
+      tile_cost: tileCost()
     });
-  });
+  };
 
   return (
     <HexGridProvider>
       <ErrorBoundary fallback="something when wrong">
-        <Show when={backgroundUrl()} fallback={<LoadingSpinner />}>
+        <Suspense fallback={<LoadingSpinner />}>
           <div class='z-10 absolute flex flex-col'>
-            <MapEditGUI tileCost={tileCost()!} tileRadius={tileRadius()!} onSetTileCost={setTileCost} onSetTileRadius={setTileRadius} />
+            <MapEditGUI
+              tileCost={tileCost()!}
+              tileRadius={tileRadius()!}
+              onSetTileCost={setTileCost}
+              onSetTileRadius={setTileRadius}
+              onSubmit={onSubmit}
+            />
           </div>
           <HexMap backgroundSrc={backgroundUrl()!} tileRadius={tileRadius()!} tileCost={tileCost()!} />
-        </Show>
+        </Suspense>
       </ErrorBoundary>
     </HexGridProvider>
   );

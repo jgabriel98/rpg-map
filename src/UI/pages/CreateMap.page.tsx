@@ -85,8 +85,7 @@ const CreateMap: Component = () => {
           />
         </div>
 
-        <MapEditGUI tileCost={tileCost()} tileRadius={tileRadius()} onSetTileCost={setTileCost} onSetTileRadius={setTileRadius} />
-        <button on:click={submit}>salvar</button>
+        <MapEditGUI onSubmit={submit} tileCost={tileCost()} tileRadius={tileRadius()} onSetTileCost={setTileCost} onSetTileRadius={setTileRadius} />
 
       </div>
       <Show when={backgroundImageFile()?.source}>

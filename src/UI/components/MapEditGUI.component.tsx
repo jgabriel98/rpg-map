@@ -1,14 +1,23 @@
-import { type Component } from 'solid-js';
+import { createSignal, type Component } from 'solid-js';
+import { Button } from '~/lib/solidui/button';
+import { LoadingSpinner } from './loading/LoadingSpinner.component';
 
 interface MapEditGUIProps {
   tileRadius: number;
   onSetTileRadius: (v: number) => void;
   tileCost: number;
   onSetTileCost: (v: number) => void;
-
+  onSubmit: () => Promise<void>;
 }
 
 const MapEditGUI: Component<MapEditGUIProps> = (props) => {
+  const [isLoading, setIsLoading] = createSignal(false);
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    await props.onSubmit();
+    setIsLoading(false);
+  };
+
   return <>
     <div>
       <span>Tamanho do bloco: </span>
@@ -24,8 +33,11 @@ const MapEditGUI: Component<MapEditGUIProps> = (props) => {
 
       <button on:click={() => props.onSetTileCost(props.tileCost + 1)}>+</button>
       <button on:click={() => props.onSetTileCost(Math.max(props.tileCost - 1, 0))}>-</button>
-
     </div>
+
+    <Button onClick={handleSubmit} disabled={isLoading()}>
+      {isLoading() ? <LoadingSpinner /> : "Salvar"}
+    </Button>
   </>;
 };
 
