@@ -38,7 +38,6 @@
     "@svgdotjs/svg.draw.js": "^3.0.2",
     "@svgdotjs/svg.js": "^3.2.4",
     "@tailwindcss/vite": "^4.1.8",
-    "@tanstack/solid-query": "^5.80.6",
     "abstract-astar": "^0.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
