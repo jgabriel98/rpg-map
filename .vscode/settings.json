@@ -22,8 +22,9 @@
     "**/.git/objects/**": true,
     "**/node_modules/**": true,
     "**/dist/**": true,
+    "**/*cache": true,
     "./supabase/**": true,
     "**/*-lock.*": true
   },
-  "npm.packageManager": "npm"
+  "npm.packageManager": "auto"
 }

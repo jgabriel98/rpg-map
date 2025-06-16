@@ -10,6 +10,11 @@ import tseslint from "typescript-eslint";
 
 export default defineConfig([
   js.configs.recommended,
+  // { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], plugins: { js }, extends: ["js/recommended"] },
+  { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: { globals: globals.browser } },
+  tseslint.configs.recommended,
+  // { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
+  // { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
   {
     files: ["**/*.{ts,tsx}"],
     ...solid,
@@ -28,12 +33,7 @@ export default defineConfig([
           "caughtErrorsIgnorePattern": "^_[^_].*$|^_$"
         }
       ],
-      "@typescript-eslint/no-explicit-any": 0
+      "@typescript-eslint/no-explicit-any": "off"
     }
   },
-  // { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], plugins: { js }, extends: ["js/recommended"] },
-  { files: ["**/*.{js,mjs,cjs,ts,mts,cts}"], languageOptions: { globals: globals.browser } },
-  tseslint.configs.recommended,
-  // { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
-  // { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
 ],);
