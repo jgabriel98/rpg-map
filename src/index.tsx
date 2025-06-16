@@ -2,7 +2,6 @@
 import { Route, Router } from "@solidjs/router";
 import { render } from 'solid-js/web';
 
-import { SessionProvider } from './contexts/Session.context';
 import Layout from './Layout';
 import { AuthGuard } from './UI/helpers/Auth';
 import Auth from './UI/pages/Auth.page';
@@ -23,17 +22,15 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 // SUGESTÃO PARA ROTAS AUTENTICADAS: https://github.com/solidjs/solid-router/discussions/364#discussioncomment-11537405
 render(() => (
-  <SessionProvider>
-    <Router root={Layout}>
-      <Route path={['/auth', '/auth/confirm']} component={Auth} />
+  <Router root={Layout}>
+    <Route path={['/auth', '/auth/confirm']} component={Auth} />
 
-      <Route path='/' component={AuthGuard}>
-        <Route path={['/', '/maps']} component={Maps} />
-        <Route path='/maps/:id' component={Map} />
-        <Route path='/maps/:id/edit' component={EditMap} />
-        <Route path='/maps/create' component={CreateMap} />
-      </Route>
+    <Route path='/' component={AuthGuard}>
+      <Route path={['/', '/maps']} component={Maps} />
+      <Route path='/maps/:id' component={Map} />
+      <Route path='/maps/:id/edit' component={EditMap} />
+      <Route path='/maps/create' component={CreateMap} />
+    </Route>
 
-    </Router>
-  </SessionProvider>
+  </Router>
 ), root!);
