@@ -1,6 +1,6 @@
 import { createAsync, useParams } from '@solidjs/router';
 import { Match, Suspense, Switch, type Component } from 'solid-js';
-import { fetchMap } from '~/services/map';
+import { fetchMap } from '~/services/map.service';
 import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';

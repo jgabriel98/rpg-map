@@ -2,7 +2,7 @@ import { createAsync, useParams } from '@solidjs/router';
 import { ErrorBoundary, Suspense, type Component } from 'solid-js';
 
 import { createAsyncSignal } from '~/lib/solidjs-helpers';
-import { fetchMap, updateMap } from '~/services/map';
+import { fetchMap, updateMap } from '~/services/map.service';
 import { HexMap } from '~/UI/components/HexMap.component';
 import { HexGridProvider } from '~/UI/directives';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';

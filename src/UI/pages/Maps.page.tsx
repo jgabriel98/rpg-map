@@ -1,19 +1,20 @@
 import { A } from '@solidjs/router';
-import { For, Suspense, type Component } from 'solid-js';
+import { createResource, For, Suspense, type Component } from 'solid-js';
 import { useSession } from '~/contexts/Session.context';
 import { Button } from '~/lib/solidui/button';
 import { Flex } from '~/lib/solidui/flex';
 import { Separator } from '~/lib/solidui/separator';
 import { showToast } from '~/lib/solidui/toast';
 import { Tables } from '~/lib/supabase/database.types';
-import { deleteMap, queryMaps } from '~/services/map';
+import { deleteMap, fetchMaps } from '~/services/map.service';
 import { LoadingSpinner } from '../components/loading/LoadingSpinner.component';
 import MapPreview from '../components/MapPreview.component';
 
 
 const Maps: Component = () => {
   const session = useSession();
-  const [allMapsQuery, { deleteMutation: deleteMapMutation }] = queryMaps(session()?.user);
+  const dependency = () => session()?.user;
+  const [allMapsQuery, { mutate: mapsListMutate }] = createResource(dependency, () => fetchMaps());
 
   const userMaps = () => allMapsQuery()?.data?.filter(map => map.owner_id == session()?.user.id);
   const otherUsersMaps = () => allMapsQuery()?.data?.filter(map => map.owner_id != session()?.user.id);
@@ -31,7 +32,14 @@ const Maps: Component = () => {
       title: `Mapa ${mapId} foi deletado`
     });
 
-    deleteMapMutation(mapId);
+    mapsListMutate(prev => {
+      if (!prev) return prev;
+
+      const next = prev;
+      next.data = next.data?.filter(map => map.id != mapId) ?? null;
+      next.count = next.count ? next.count - 1 : next.count ?? null;
+      return { ...next };
+    });
   };
 
   return <Suspense fallback={<LoadingSpinner class='size-32 m-auto' />} >
