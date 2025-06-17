@@ -22,12 +22,17 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br>
 
 
+## Deploying on netlify
+Run `netlify link` to link the project with netlify
+
+Any commit to `main` (default branch) will trigger a deploy
+
 ## Deploying on local machine
 
 #### First time
 1. Build the app for production into `./dist/` folder.
    ```bash
-   npm run build
+   pnpm run build
    ```
 
 2. Create  `/var/www/rpg/html/` folder and copy `./dist/` into the expected folder by nginx. _(defined at `./nginx.conf`)_
@@ -51,11 +56,11 @@ The page will reload if you make edits.<br>
    sudo nginx -s reload
    ```
 
-#### Update deploy
+#### Update local deploy
 If you already set up all nginx configs because you've deployed once,<br/>
 just rebuild and copy the build into `/var/www/rpg/html/` :
 
 ```bash
-npm run build
+pnpm run build
 sudo cp -r ./dist/* /var/www/rpg/html/
 ```

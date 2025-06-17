@@ -9,7 +9,8 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "preview": "vite preview",
+    "deploy": "netlify deploy --prod"
   },
   "license": "MIT",
   "devDependencies": {
